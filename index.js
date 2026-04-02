@@ -99,5 +99,8 @@ initDB()
   })
   .catch((err) => {
     console.error('Failed to initialise database:', err.message);
+    console.error('Full error:', err.stack);
+    console.error('DATABASE_URL set?', !!process.env.DATABASE_URL);
+    console.error('DATABASE_URL preview:', process.env.DATABASE_URL?.slice(0, 30));
     process.exit(1);
   });
