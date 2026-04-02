@@ -1,4 +1,12 @@
 require('dotenv').config();
+
+console.log('ENV CHECK:', JSON.stringify({
+  PGHOST: process.env.PGHOST,
+  PGPORT: process.env.PGPORT,
+  PGUSER: process.env.PGUSER,
+  PGDATABASE: process.env.PGDATABASE,
+}));
+
 const express = require('express');
 const { Pool } = require('pg');
 
