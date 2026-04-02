@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TaskRail</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d0d0d;
+      --surface:  #161616;
+      --border:   #2a2a2a;
+      --accent:   #c8f04d;
+      --accent2:  #4dffc3;
+      --text:     #e8e8e0;
+      --muted:    #5a5a52;
+      --done:     #2a2a2a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      padding: 0 1rem 4rem;
+    }
+
+    /* ── header ── */
+    header {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 3rem 0 2rem;
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--accent);
+    }
+    header span {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* ── badge row ── */
+    .badge-row {
+      max-width: 680px;
+      margin: 1.2rem auto 0;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .badge {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .badge.live { border-color: var(--accent); color: var(--accent); }
+
+    /* ── add form ── */
+    .add-form {
+      max-width: 680px;
+      margin: 2.5rem auto 0;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .add-form input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .add-form input:focus { border-color: var(--accent); }
+    .add-form input::placeholder { color: var(--muted); }
+    .add-form button {
+      background: var(--accent);
+      color: #0d0d0d;
+      border: none;
+      border-radius: 4px;
+      padding: 0.75rem 1.4rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .add-form button:hover { opacity: 0.88; transform: translateY(-1px); }
+    .add-form button:active { transform: translateY(0); }
+
+    /* ── error ── */
+    .error {
+      max-width: 680px;
+      margin: 1rem auto 0;
+      padding: 0.75rem 1rem;
+      background: #1f0a0a;
+      border: 1px solid #5a1a1a;
+      border-radius: 4px;
+      color: #f07070;
+      font-size: 0.8rem;
+    }
+
+    /* ── tasks ── */
+    .section-label {
+      max-width: 680px;
+      margin: 2.5rem auto 0.75rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .task-list { max-width: 680px; margin: 0 auto; }
+
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 0.4rem;
+      transition: border-color 0.2s, background 0.2s;
+      animation: slideIn 0.2s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .task:hover { border-color: #3a3a3a; }
+    .task.done  { background: var(--done); opacity: 0.55; }
+
+    /* toggle button (acts as checkbox) */
+    .toggle-btn {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid var(--muted);
+      background: transparent;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.2s, background 0.2s;
+      padding: 0;
+    }
+    .toggle-btn:hover { border-color: var(--accent2); }
+    .task.done .toggle-btn {
+      background: var(--accent2);
+      border-color: var(--accent2);
+    }
+    .toggle-btn svg { display: none; }
+    .task.done .toggle-btn svg { display: block; }
+
+    .task-title {
+      flex: 1;
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+    .task.done .task-title {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .task-meta {
+      font-size: 0.65rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .delete-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0 0.2rem;
+      transition: color 0.15s;
+    }
+    .delete-btn:hover { color: #f07070; }
+
+    /* ── empty state ── */
+    .empty {
+      max-width: 680px;
+      margin: 2rem auto 0;
+      padding: 3rem;
+      text-align: center;
+      border: 1px dashed var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 2;
+    }
+    .empty strong { color: var(--accent); font-family: 'Syne', sans-serif; }
+
+    /* ── footer ── */
+    footer {
+      max-width: 680px;
+      margin: 3rem auto 0;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.65rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    footer span { color: var(--accent2); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>TaskRail</h1>
+  <span>deployed on Railway · PaaS demo</span>
+</header>
+
+<div class="badge-row">
+  <div class="badge live">● live</div>
+  <div class="badge">Node.js + Express</div>
+  <div class="badge">PostgreSQL</div>
+  <div class="badge">CI/CD via GitHub</div>
+</div>
+
+<% if (error) { %>
+  <div class="error">⚠ <%= error %></div>
+<% } %>
+
+<!-- Add task form -->
+<form class="add-form" action="/tasks" method="POST">
+  <input
+    type="text"
+    name="title"
+    placeholder="Add a new task…"
+    autocomplete="off"
+    required
+    maxlength="255"
+  />
+  <button type="submit">+ Add</button>
+</form>
+
+<!-- Task list -->
+<% if (tasks.length === 0) { %>
+  <div class="empty">
+    <strong>No tasks yet.</strong><br/>
+    Add one above — it will be saved<br/>
+    to your Railway PostgreSQL database.
+  </div>
+<% } else { %>
+  <p class="section-label"><%= tasks.filter(t => !t.completed).length %> pending · <%= tasks.filter(t => t.completed).length %> done</p>
+  <div class="task-list">
+    <% tasks.forEach(task => { %>
+      <div class="task <%= task.completed ? 'done' : '' %>">
+
+        <!-- Toggle complete -->
+        <form action="/tasks/<%= task.id %>/toggle" method="POST" style="display:contents">
+          <button class="toggle-btn" type="submit" title="Toggle complete">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+              <path d="M1 4l3 3 5-6" stroke="#0d0d0d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </form>
+
+        <span class="task-title"><%= task.title %></span>
+
+        <span class="task-meta">
+          <%= new Date(task.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short' }) %>
+        </span>
+
+        <!-- Delete -->
+        <form action="/tasks/<%= task.id %>/delete" method="POST" style="display:contents">
+          <button class="delete-btn" type="submit" title="Delete task">✕</button>
+        </form>
+
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<footer>
+  <span>TaskRail</span>
+  <span>Node.js · Express · PostgreSQL · Railway PaaS</span>
+</footer>
+
+</body>
+</html>
